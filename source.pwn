@@ -1,8 +1,8 @@
-
 #include <a_samp>
-
+#include <zcmd>
 new PlayerText:cWspeedo[MAX_PLAYERS][10];
 new carfuel[MAX_VEHICLES] = {100, ...}; // connect this with your own vehicle fuel code (if you have one)
+new PlayerSpeedo[MAX_PLAYERS]; // 0 = KM/H, 1 = MP/H
 public OnFilterScriptInit()
 {
 	print("\n--------------------------------------");
@@ -48,6 +48,20 @@ Float:GetVehicleSpeed(vehicleid)
 
 	return 0.0;
 }
+Float:GetVehicleSpeedMPH(vehicleid)
+{
+	new
+	    Float:x,
+	    Float:y,
+	    Float:z;
+
+	if(GetVehicleVelocity(vehicleid, x, y, z))
+	{
+		return floatsqroot((x * x) + (y * y) + (z * z)) * 100;
+	}
+
+	return 0.0;
+}
 IsAbicycle(vehid)
 {
 	switch(GetVehicleModel(vehid))
@@ -71,6 +85,7 @@ GetVehicleName(vehicleid)
 }
 public OnPlayerConnect(playerid)
 {
+    PlayerSpeedo[playerid] = 0; // default speed KM/H
 	//------------------------------------------------------------------------//
 	cWspeedo[playerid][0] = CreatePlayerTextDraw(playerid, 525.111389, 394.088836, "box");
 	PlayerTextDrawLetterSize(playerid, cWspeedo[playerid][0], 0.000000, -0.044444);
@@ -239,17 +254,52 @@ public OnPlayerUpdate(playerid)
 	new vehicle = GetPlayerVehicleID(playerid);
 	if(IsPlayerInAnyVehicle(playerid) && GetPlayerState(playerid) == PLAYER_STATE_DRIVER) // Making sure the player is in a vehicle as driver
 	{
-		new Float:H;
-		GetVehicleHealth(vehicle, H);
-		new speed[24];
-		format(speed, sizeof(speed), "%.0f", GetVehicleSpeed(vehicle));
-		PlayerTextDrawSetString(playerid, cWspeedo[playerid][3], speed);
-		new vehfuel[24];
-		format(vehfuel, sizeof(vehfuel), "%d", carfuel[vehicle]);
-		PlayerTextDrawSetString(playerid, cWspeedo[playerid][6], vehfuel);
-        new vehiclehealth[24];
-        format(vehiclehealth, sizeof(vehiclehealth), "%.1f", H);
-		PlayerTextDrawSetString(playerid, cWspeedo[playerid][8], vehiclehealth);
+	    if(PlayerSpeedo[playerid] == 0)
+	    {
+			new Float:H;
+			GetVehicleHealth(vehicle, H);
+			new speed[24];
+			format(speed, sizeof(speed), "%.0f", GetVehicleSpeed(vehicle));
+			PlayerTextDrawSetString(playerid, cWspeedo[playerid][3], speed);
+			new vehfuel[24];
+			format(vehfuel, sizeof(vehfuel), "%d", carfuel[vehicle]);
+			PlayerTextDrawSetString(playerid, cWspeedo[playerid][6], vehfuel);
+	        new vehiclehealth[24];
+	        format(vehiclehealth, sizeof(vehiclehealth), "%.0f", H);
+			PlayerTextDrawSetString(playerid, cWspeedo[playerid][8], vehiclehealth);
+		}
+		else if(PlayerSpeedo[playerid] == 1)
+		{
+			new Float:H;
+			GetVehicleHealth(vehicle, H);
+			new speed[24];
+			format(speed, sizeof(speed), "%.0f", GetVehicleSpeedMPH(vehicle));
+			PlayerTextDrawSetString(playerid, cWspeedo[playerid][3], speed);
+			new vehfuel[24];
+			format(vehfuel, sizeof(vehfuel), "%d", carfuel[vehicle]);
+			PlayerTextDrawSetString(playerid, cWspeedo[playerid][6], vehfuel);
+	        new vehiclehealth[24];
+	        format(vehiclehealth, sizeof(vehiclehealth), "%.0f", H);
+			PlayerTextDrawSetString(playerid, cWspeedo[playerid][8], vehiclehealth);
+			PlayerTextDrawSetString(playerid, cWspeedo[playerid][5], "MP/H");
+		}
+	}
+	return 1;
+}
+
+//-----------------------------------------------------------------------------//
+CMD:switchspeedo(playerid, params[])
+{
+	#pragma unused params
+	if(PlayerSpeedo[playerid] == 0)
+	{
+        PlayerSpeedo[playerid] = 1;
+        SendClientMessage(playerid, -1, "Your speed has been switched to MP/H");
+	}
+	else
+	{
+        PlayerSpeedo[playerid] = 0;
+		SendClientMessage(playerid, -1, "Your speed has been switched to KM/H");
 	}
 	return 1;
 }
