@@ -227,14 +227,15 @@ public OnPlayerStateChange(playerid, newstate, oldstate)
 	if(newstate == PLAYER_STATE_DRIVER)
 	{
 	    new vehicleid = GetPlayerVehicleID(playerid);
-        new vstr[30];
-		format(vstr, sizeof(vstr), "%s", GetVehicleName(vehicleid));
-		PlayerTextDrawSetString(playerid, cWspeedo[playerid][4], vstr);
-
-        PlayerTextDrawSetPreviewModel(playerid, cWspeedo[playerid][2], GetVehicleModel(GetPlayerVehicleID(playerid)));
-	    PlayerTextDrawShow(playerid, cWspeedo[playerid][2]);
 		if(!IsAbicycle(vehicleid))
 		{
+	        new vstr[30];
+			format(vstr, sizeof(vstr), "%s", GetVehicleName(vehicleid));
+			PlayerTextDrawSetString(playerid, cWspeedo[playerid][4], vstr);
+
+	        PlayerTextDrawSetPreviewModel(playerid, cWspeedo[playerid][2], GetVehicleModel(GetPlayerVehicleID(playerid)));
+		    PlayerTextDrawShow(playerid, cWspeedo[playerid][2]);
+
 			for(new i = 0; i < 10; i++) {
 				PlayerTextDrawShow(playerid, cWspeedo[playerid][i]);
 			}
@@ -252,7 +253,7 @@ public OnPlayerStateChange(playerid, newstate, oldstate)
 public OnPlayerUpdate(playerid)
 {
 	new vehicle = GetPlayerVehicleID(playerid);
-	if(IsPlayerInAnyVehicle(playerid) && GetPlayerState(playerid) == PLAYER_STATE_DRIVER) // Making sure the player is in a vehicle as driver
+	if(IsPlayerInAnyVehicle(playerid) && GetPlayerState(playerid) == PLAYER_STATE_DRIVER && !IsAbicycle(vehicle)) // Making sure the player is in a vehicle as driver
 	{
 	    if(PlayerSpeedo[playerid] == 0)
 	    {
